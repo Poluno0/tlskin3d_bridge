@@ -36,6 +36,36 @@ public final class SkinCopier {
     private static int created;
     private static int events;
 
+    /** Можно ли ещё читать эту картинку (не закрыта ли она). */
+    public static boolean isUsable(NativeImage img) {
+        if (img == null) {
+            return false;
+        }
+        try {
+            img.getPixelRGBA(0, 0);
+            return true;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    public static void closeQuietly(NativeImage img) {
+        if (img != null) {
+            try {
+                img.close();
+            } catch (Throwable ignored) {
+                // уже закрыта
+            }
+        }
+    }
+
+    /** Новая независимая копия картинки. */
+    public static NativeImage duplicate(NativeImage src) {
+        NativeImage out = new NativeImage(src.getWidth(), src.getHeight(), true);
+        out.copyFrom(src);
+        return out;
+    }
+
     /** Краткое описание картинки для лога: размер, выделена ли память, сколько видимых пикселей в слоях (оверлее). */
     public static String describe(NativeImage img) {
         if (img == null) {
