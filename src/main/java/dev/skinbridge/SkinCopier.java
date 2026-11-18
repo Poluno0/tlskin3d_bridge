@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class SkinCopier {
     private static final Map<Class<?>, Accessors> ACCESSORS = new ConcurrentHashMap<>();
     private static int logged;
+    private static int rejected;
     private static boolean warned;
 
     private SkinCopier() {
@@ -32,6 +33,16 @@ public final class SkinCopier {
         }
     }
 
+    private static int created;
+
+    /** Диагностика: пишет в лог, что TL создал текстуру (первые несколько раз). */
+    public static void logTextureCreated(Object wrap) {
+        if (created < 8) {
+            created++;
+            SkinBridgeMod.LOGGER.info("TL created a texture from {}", wrap == null ? "null" : wrap.getClass().getSimpleName());
+        }
+    }
+
     /** Возвращает копию скина 64x64 или null, если это не скин (или формат не подходит). */
     public static NativeImage copy(Object wrap) {
         if (wrap == null) {
@@ -43,6 +54,11 @@ public final class SkinCopier {
             int h = (Integer) a.height.invoke(wrap);
             // Skin Layers 3D умеет работать только с 64x64 (старые 64x32 мы достраиваем сами).
             if (w != 64 || (h != 64 && h != 32)) {
+                if (rejected < 5) {
+                    rejected++;
+                    SkinBridgeMod.LOGGER.info("Skipped a {}x{} image from {} (only 64x64 and 64x32 skins are supported)",
+                            w, h, wrap.getClass().getSimpleName());
+                }
                 return null;
             }
             NativeImage out = new NativeImage(64, 64, true);
