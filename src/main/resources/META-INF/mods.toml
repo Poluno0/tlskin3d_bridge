@@ -1,0 +1,40 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+
+[[mods]]
+modId="tlskin3dbridge"
+version="1.0.0"
+displayName="TL Skin Cape - Skin Layers 3D Bridge"
+displayTest="IGNORE_SERVER_VERSION"
+description='''
+Клиентский мод. Позволяет Skin Layers 3D строить 3D-слои для скинов, которые загружает TL Skin Cape.
+'''
+
+[[dependencies.tlskin3dbridge]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.tlskin3dbridge]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1,1.21)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.tlskin3dbridge]]
+    modId="tlskincape"
+    mandatory=true
+    versionRange="[1,)"
+    ordering="AFTER"
+    side="CLIENT"
+
+[[dependencies.tlskin3dbridge]]
+    modId="skinlayers3d"
+    mandatory=true
+    versionRange="[1,)"
+    ordering="AFTER"
+    side="CLIENT"
