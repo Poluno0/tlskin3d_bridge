@@ -36,9 +36,29 @@ public final class SkinCopier {
     private static int created;
     private static int events;
 
+    /** Краткое описание картинки для лога: размер, выделена ли память, сколько видимых пикселей в слоях (оверлее). */
+    public static String describe(NativeImage img) {
+        if (img == null) {
+            return "NONE";
+        }
+        try {
+            int visible = 0;
+            for (int y = 0; y < 16; y++) {
+                for (int x = 32; x < 64; x++) {
+                    if (((img.getPixelRGBA(x, y) >>> 24) & 0xFF) != 0) {
+                        visible++;
+                    }
+                }
+            }
+            return img.getWidth() + "x" + img.getHeight() + ", head overlay visible pixels=" + visible;
+        } catch (Throwable t) {
+            return "UNREADABLE (" + t.getClass().getSimpleName() + ")";
+        }
+    }
+
     /** Диагностика: события жизненного цикла (до 60 строк за запуск). */
     public static void logEvent(String message) {
-        if (events < 60) {
+        if (events < 150) {
             events++;
             SkinBridgeMod.LOGGER.info("[event] {}", message);
         }
