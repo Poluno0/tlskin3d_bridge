@@ -34,7 +34,8 @@ public abstract class LightTextureMixin implements HttpTextureAccessor {
 
     @Inject(method = "close()V", at = @At("HEAD"), remap = false)
     private void skinbridge$onClose(CallbackInfo ci) {
-        skinbridge$release();
+        // Копию намеренно НЕ освобождаем: TL может закрыть текстуру, а скин в игре продолжит использоваться.
+        SkinCopier.logEvent("TL closed a texture (our copy is " + (skinbridge$image != null ? "kept" : "empty") + ")");
     }
 
     @Unique
@@ -52,6 +53,7 @@ public abstract class LightTextureMixin implements HttpTextureAccessor {
 
     @Override
     public NativeImage getImage() {
+        SkinCopier.logEvent("Skin Layers asked for the skin image: " + (skinbridge$image != null ? "given" : "NONE"));
         return skinbridge$image;
     }
 }
