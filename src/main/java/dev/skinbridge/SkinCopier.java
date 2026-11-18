@@ -34,10 +34,19 @@ public final class SkinCopier {
     }
 
     private static int created;
+    private static int events;
+
+    /** Диагностика: события жизненного цикла (до 60 строк за запуск). */
+    public static void logEvent(String message) {
+        if (events < 60) {
+            events++;
+            SkinBridgeMod.LOGGER.info("[event] {}", message);
+        }
+    }
 
     /** Диагностика: пишет в лог, что TL создал текстуру (первые несколько раз). */
     public static void logTextureCreated(Object wrap) {
-        if (created < 8) {
+        if (created < 30) {
             created++;
             SkinBridgeMod.LOGGER.info("TL created a texture from {}", wrap == null ? "null" : wrap.getClass().getSimpleName());
         }
@@ -71,7 +80,7 @@ public final class SkinCopier {
             if (h == 32) {
                 convertLegacy(out);
             }
-            if (logged < 3) {
+            if (logged < 20) {
                 logged++;
                 SkinBridgeMod.LOGGER.info("Captured a {}x{} skin image from {}", w, h, wrap.getClass().getSimpleName());
             }
