@@ -22,8 +22,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(targets = "org.tlauncher.renderer.texture.LightTexture", remap = false)
 public abstract class LightTextureMixin implements HttpTextureAccessor {
 
+    /** Наш личный оригинал: его никому не отдаём, поэтому его не может закрыть Skin Layers. */
     @Unique
     private NativeImage skinbridge$image;
+
+    /** Последняя копия, отданная Skin Layers (он вправе её закрыть, например при выходе из мира). */
+    @Unique
+    private NativeImage skinbridge$handedOut;
 
     @Inject(method = "load(Ljava/lang/Object;)V", at = @At("HEAD"), remap = false)
     private void skinbridge$capture(Object image, CallbackInfo ci) {
@@ -43,6 +48,8 @@ public abstract class LightTextureMixin implements HttpTextureAccessor {
 
     @Unique
     private void skinbridge$release() {
+        SkinCopier.closeQuietly(skinbridge$handedOut);
+        skinbridge$handedOut = null;
         NativeImage old = skinbridge$image;
         skinbridge$image = null;
         if (old != null) {
@@ -56,8 +63,16 @@ public abstract class LightTextureMixin implements HttpTextureAccessor {
 
     @Override
     public NativeImage getImage() {
-        SkinCopier.logEvent("Skin Layers asked for the skin image (texture #" + System.identityHashCode(this) + "): "
-                + SkinCopier.describe(skinbridge$image));
-        return skinbridge$image;
+        if (skinbridge$image == null) {
+            SkinCopier.logEvent("Skin Layers asked for the skin image (texture #" + System.identityHashCode(this) + "): NONE");
+            return null;
+        }
+        if (!SkinCopier.isUsable(skinbridge$handedOut)) {
+            // Прежнюю копию Skin Layers уже закрыл (или её не было): делаем новую из оригинала.
+            skinbridge$handedOut = SkinCopier.duplicate(skinbridge$image);
+            SkinCopier.logEvent("Skin Layers asked for the skin image (texture #" + System.identityHashCode(this)
+                    + "): new copy, " + SkinCopier.describe(skinbridge$handedOut));
+        }
+        return skinbridge$handedOut;
     }
 }
