@@ -28,6 +28,7 @@ public abstract class LightTextureMixin implements HttpTextureAccessor {
     @Inject(method = "load(Ljava/lang/Object;)V", at = @At("HEAD"), remap = false)
     private void skinbridge$capture(Object image, CallbackInfo ci) {
         skinbridge$release();
+        SkinCopier.logTextureCreated(image);
         skinbridge$image = SkinCopier.copy(image);
     }
 
